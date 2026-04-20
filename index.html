@@ -1,0 +1,1604 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>大转盘小决定 - 静态版</title>
+  <style>
+    :root {
+      --bg: #0f1221;
+      --panel: rgba(255,255,255,0.08);
+      --panel-2: rgba(255,255,255,0.05);
+      --border: rgba(255,255,255,0.14);
+      --text: #f4f7ff;
+      --muted: #b8c0dc;
+      --accent: #7c9cff;
+      --accent-2: #8ef0ff;
+      --success: #8ef7ae;
+      --danger: #ff9aa2;
+      --shadow: 0 16px 50px rgba(0,0,0,0.35);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 10%, rgba(124,156,255,0.18), transparent 30%),
+        radial-gradient(circle at 80% 0%, rgba(142,240,255,0.12), transparent 25%),
+        linear-gradient(180deg, #13172a 0%, #0e1020 100%);
+      min-height: 100vh;
+    }
+    .app {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      min-height: 100vh;
+      gap: 20px;
+      padding: 20px;
+    }
+    .sidebar, .main, .sequence-column {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+      border-radius: 24px;
+    }
+    .sidebar {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .brand h1 { margin: 0; font-size: 24px; }
+    .brand p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+    .search {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    input[type="text"], textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 14px;
+      outline: none;
+      font-size: 14px;
+    }
+    input[type="text"]::placeholder, textarea::placeholder { color: #97a1c4; }
+    .wheel-list {
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-right: 4px;
+    }
+    .wheel-card {
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid transparent;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+    .wheel-card-bottom {
+      margin-top: 8px;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .add-seq-btn {
+      padding: 7px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .wheel-card:hover { transform: translateY(-1px); background: rgba(255,255,255,0.06); border-color: var(--border); }
+    .wheel-card.active { border-color: rgba(124,156,255,0.75); background: rgba(124,156,255,0.12); }
+    .wheel-card .t { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .wheel-card .m { font-size: 12px; color: var(--muted); }
+    .main {
+      padding: 22px;
+      display: grid;
+      grid-template-columns: minmax(360px, 1.25fr) minmax(280px, 420px) minmax(280px, 340px);
+      align-items: start;
+      gap: 22px;
+    }
+    .stage {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 20px;
+    }
+    .stage-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .stage h2 { margin: 0; font-size: 26px; line-height: 1.25; }
+    .sub { color: var(--muted); font-size: 14px; line-height: 1.5; }
+    .canvas-wrap {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 560px;
+    }
+    .pointer {
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0; height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-top: 34px solid #fff;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,.25));
+      z-index: 2;
+    }
+    canvas {
+      width: min(100%, 560px);
+      aspect-ratio: 1;
+      max-width: 560px;
+      display: block;
+    }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+    button {
+      appearance: none;
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--accent), #6285ff);
+      box-shadow: 0 10px 24px rgba(98,133,255,0.28);
+      transition: transform .15s ease, opacity .15s ease;
+    }
+    button:hover { transform: translateY(-1px); }
+    button.secondary { background: rgba(255,255,255,0.08); box-shadow: none; border: 1px solid var(--border); }
+    button.ghost { background: transparent; box-shadow: none; border: 1px dashed var(--border); color: var(--muted); }
+    button.danger { background: rgba(255,154,162,0.12); color: #ffd8dc; box-shadow: none; border: 1px solid rgba(255,154,162,0.28); }
+    button:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+    .result {
+      margin-top: 16px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(142,247,174,0.1);
+      border: 1px solid rgba(142,247,174,0.22);
+      font-size: 16px;
+      min-height: 58px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 6px;
+    }
+    .editor, .sequence-column {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-height: calc(100vh - 84px);
+      overflow: auto;
+    }
+    .sequence-column {
+      gap: 16px;
+    }
+    .section-title { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
+    .mini { font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .stat {
+      padding: 12px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+    }
+    .stat .v { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+    .stat .k { font-size: 12px; color: var(--muted); }
+    .items { display: flex; flex-direction: column; gap: 10px; }
+    .item-row {
+      display: grid;
+      grid-template-columns: 1fr 90px 44px;
+      gap: 8px;
+      align-items: center;
+    }
+    .item-row input { padding: 10px 12px; }
+    .footer-note { color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+    }
+
+    .sidebar-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .sequence-panel {
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .sequence-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 220px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+    .seq-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+    }
+    .seq-main {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .seq-title {
+      min-width: 0;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .seq-badge {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #fff;
+      background: rgba(124,156,255,0.7);
+      border: 1px solid rgba(124,156,255,0.9);
+    }
+    .seq-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .tiny-btn {
+      padding: 7px 9px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      min-width: 36px;
+    }
+    .wheel-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .wheel-order-tag {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      height: 28px;
+      padding: 0 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #fff;
+      background: rgba(124,156,255,0.22);
+      border: 1px solid rgba(124,156,255,0.45);
+    }
+    .status-line {
+      margin-top: 10px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .sequence-image-wrap {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .sequence-image-wrap.show {
+      display: flex;
+    }
+    .sequence-result-image {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      display: block;
+    }
+    .sequence-download {
+      text-align: center;
+      text-decoration: none;
+      border-radius: 14px;
+      padding: 11px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--border);
+    }
+    .sequence-summary {
+      width: 100%;
+      display: grid;
+      gap: 8px;
+    }
+    .sequence-summary-title {
+      font-weight: 800;
+    }
+    .sequence-summary-list {
+      margin: 0;
+      padding-left: 2em;
+      line-height: 1.65;
+      column-width: 260px;
+      column-gap: 28px;
+    }
+    .sequence-summary-list li {
+      break-inside: avoid;
+      padding-left: 0.35em;
+    }
+    @media (max-width: 1380px) {
+      .main {
+        grid-template-columns: minmax(360px, 1fr) minmax(280px, 360px);
+        grid-template-areas:
+          "stage editor"
+          "stage sequence";
+      }
+      .stage { grid-area: stage; }
+      .editor { grid-area: editor; }
+      .sequence-column { grid-area: sequence; }
+    }
+    @media (max-width: 1180px) {
+      .app { grid-template-columns: 1fr; }
+      .main { grid-template-columns: 1fr; grid-template-areas: none; }
+      .editor, .sequence-column { max-height: none; }
+      .canvas-wrap { min-height: 420px; }
+    }
+    @media (max-width: 640px) {
+      .app { padding: 12px; gap: 12px; }
+      .sidebar, .main, .sequence-column { border-radius: 18px; }
+      .main { padding: 14px; }
+      .stage, .editor, .sequence-column { border-radius: 18px; padding: 14px; }
+      .stage h2 { font-size: 22px; }
+      .stats { grid-template-columns: 1fr; }
+      .item-row { grid-template-columns: 1fr 80px 42px; }
+    }
+
+    .settings-toggle {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 20;
+      min-width: 82px;
+    }
+    body:not(.settings-open) .app {
+      grid-template-columns: 1fr;
+      align-items: center;
+      justify-items: center;
+    }
+    body:not(.settings-open) .sidebar,
+    body:not(.settings-open) .editor,
+    body:not(.settings-open) .sequence-column {
+      display: none;
+    }
+    body:not(.settings-open) #stopBtn,
+    body:not(.settings-open) #randomWheelBtn,
+    body:not(.settings-open) #copyResultBtn {
+      display: none;
+    }
+    body:not(.settings-open) .main {
+      width: min(100%, 760px);
+      grid-template-columns: 1fr;
+      padding: 22px;
+    }
+    body:not(.settings-open) .stage {
+      width: 100%;
+    }
+    body:not(.settings-open) .canvas-wrap {
+      min-height: min(62vh, 620px);
+    }
+    body.settings-open .settings-toggle {
+      background: rgba(255,255,255,0.08);
+      box-shadow: none;
+      border: 1px solid var(--border);
+    }
+    @media (max-width: 1380px) {
+      body:not(.settings-open) .main {
+        grid-template-columns: 1fr;
+        grid-template-areas: none;
+      }
+      body.settings-open .main {
+        grid-template-columns: minmax(360px, 1fr) minmax(280px, 360px);
+        grid-template-areas:
+          "stage editor"
+          "stage sequence";
+      }
+    }
+    @media (max-width: 1180px) {
+      body.settings-open .app { grid-template-columns: 1fr; }
+      body.settings-open .main { grid-template-columns: 1fr; grid-template-areas: none; }
+    }
+    @media (max-width: 640px) {
+      .settings-toggle {
+        top: 12px;
+        right: 12px;
+        padding: 10px 12px;
+      }
+      body:not(.settings-open) .main {
+        padding: 14px;
+      }
+      body:not(.settings-open) .canvas-wrap {
+        min-height: 420px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button id="settingsToggle" class="settings-toggle" type="button" aria-expanded="false">设置</button>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>🎯 大转盘小决定</h1>
+        <p>已加载你导出的全部转盘数据。支持搜索、切换、旋转抽取、前端本地编辑与导出。</p>
+      </div>
+      <div class="search">
+        <input id="searchInput" type="text" placeholder="搜索转盘标题…" />
+      </div>
+      <div class="sidebar-actions">
+        <button id="createWheelBtn">新增新转盘</button>
+        <button id="addCurrentToSequenceBtn" class="secondary">当前加入顺序</button>
+      </div>
+      <div id="wheelList" class="wheel-list"></div>
+    </aside>
+
+    <main class="main">
+      <section class="stage">
+        <div class="stage-top">
+          <div>
+            <h2 id="wheelTitle">-</h2>
+            <div class="sub" id="wheelMeta">-</div>
+          </div>
+          <div class="pill" id="wheelIndexPill">#1</div>
+        </div>
+
+        <div class="canvas-wrap">
+          <div class="pointer"></div>
+          <canvas id="wheelCanvas" width="1200" height="1200"></canvas>
+        </div>
+
+        <div class="actions">
+          <button id="spinBtn">开始旋转</button>
+          <button id="nextSequenceBtn" class="secondary" hidden>下一个转盘</button>
+          <button id="stopBtn" class="secondary">立即停止</button>
+          <button id="randomWheelBtn" class="secondary">随机换一个转盘</button>
+          <button id="copyResultBtn" class="ghost">复制结果</button>
+        </div>
+
+        <div class="result" id="resultBox">点击“开始旋转”抽取结果。</div>
+      </section>
+
+      <aside class="editor">
+        <div>
+          <div class="section-title">当前转盘信息</div>
+          <div class="mini">你可以直接在前端修改标题、选项和权重。数据会自动保存在浏览器本地。</div>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><div class="v" id="itemsCount">0</div><div class="k">选项数量</div></div>
+          <div class="stat"><div class="v" id="totalWeight">0</div><div class="k">总权重</div></div>
+          <div class="stat"><div class="v" id="lastWinner">-</div><div class="k">上次结果</div></div>
+        </div>
+
+        <div>
+          <div class="section-title">标题</div>
+          <input id="titleInput" type="text" placeholder="输入转盘标题" />
+        </div>
+
+        <div>
+          <div class="toolbar">
+            <button id="addItemBtn" class="secondary">新增选项</button>
+            <button id="saveBtn" class="secondary">保存修改</button>
+            <button id="resetCurrentBtn" class="danger">恢复当前转盘</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-title">选项编辑</div>
+          <div class="mini">右侧数字为权重，权重越大，被抽中的概率越高。</div>
+        </div>
+        <div class="items" id="itemsEditor"></div>
+
+        <div>
+          <div class="section-title">数据导出</div>
+          <div class="toolbar">
+            <button id="exportCurrentBtn" class="secondary">导出当前转盘 JSON</button>
+            <button id="exportAllBtn" class="secondary">导出全部数据 JSON</button>
+            <button id="resetAllBtn" class="danger">清空本地改动</button>
+          </div>
+        </div>
+
+        <div class="footer-note">
+          这是一个纯静态版本：无后端、无数据库、可直接部署到 GitHub Pages / Netlify / Vercel，或者双击本地 HTML 使用。
+        </div>
+      </aside>
+
+
+      <aside class="sequence-column">
+        <div>
+          <div class="section-title">开始抽奖</div>
+          <div class="mini">把想参与的转盘加入队列后，就能按你设定的顺序一个接一个抽下去。</div>
+        </div>
+
+        <div class="sequence-panel">
+          <div class="toolbar">
+            <button id="spinSequenceBtn">开始抽奖</button>
+            <button id="clearSequenceBtn" class="danger">清空顺序</button>
+          </div>
+          <div id="sequenceList" class="sequence-list"></div>
+        </div>
+
+        <div>
+          <div class="section-title">抽奖进度</div>
+          <div class="status-line" id="sequenceStatus">当前未开始顺序抽奖。</div>
+        </div>
+
+        <div id="sequenceImageWrap" class="sequence-image-wrap">
+          <div class="section-title">抽奖结果图</div>
+          <img id="sequenceResultImage" class="sequence-result-image" alt="顺序抽奖结果图" />
+          <a id="downloadSequenceImage" class="sequence-download" download="顺序抽奖结果.png" href="#">重新下载结果图</a>
+        </div>
+
+        <div>
+          <div class="toolbar">
+            <button id="stopSequenceBtn" class="secondary">停止抽奖</button>
+          </div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    const ORIGINAL_DATA = {"exportTime":1776706813513,"version":4,"settings":{"sequenceDbIds":[128,1,2,3,4,6,7,8,9,19,29,31,35,36],"currentWheelDbId":6},"wheels":[{"dbId":128,"title":"你的BGM是","items":[{"text":"AIZO","weight":1}]},{"dbId":1,"items":[{"text":"咒术师","weight":10},{"text":"诅咒师","weight":10},{"text":"普通人","weight":10},{"text":"咒术高层（御三家）","weight":5},{"text":"咒灵","weight":5}],"title":"穿越后的初始身份"},{"dbId":2,"items":[{"text":"千年前平安时代","weight":4},{"text":"怀玉时期","weight":10},{"text":"剧情开始时","weight":10},{"text":"涩谷事变时期","weight":10},{"text":"死灭回游时期","weight":10},{"text":"新宿决战时期","weight":10},{"text":"68年后外传","weight":2},{"text":"400年前","weight":4},{"text":"零卷时期","weight":8}],"title":"穿越后的时间点"},{"dbId":3,"items":[{"text":"E（普通人）","weight":300},{"text":"D（弱四级）","weight":300},{"text":"C（三级）","weight":300},{"text":"B（二级）","weight":300},{"text":"A（一级）","weight":300},{"text":"S（五条）","weight":300},{"text":"SS（乙骨）","weight":300},{"text":"SSS（宿傩）","weight":300},{"text":"E-（天与暴君同款咒力）","weight":200},{"text":"“INF”（零卷里香）","weight":10},{"text":"INF（是大奖金秤次，母庸置疑！）","weight":1}],"title":"咒力总量"},{"dbId":4,"items":[{"text":"SSS（六眼级）","weight":2},{"text":"SS（宿傩）","weight":3},{"text":"S（特级平均值）","weight":3},{"text":"A（一级术师）","weight":3},{"text":"B（二级术师）","weight":3},{"text":"C（三级术师）","weight":3},{"text":"D（初学者）","weight":3},{"text":"E（近乎没有）","weight":3},{"text":"E-（无）","weight":2},{"text":"E--（消耗不减反增）","weight":1}],"title":"咒力效率"},{"dbId":6,"items":[{"text":"十种影法术","weight":1},{"text":"无下限","weight":1},{"text":"赤血操术","weight":1},{"text":"咒灵操术","weight":1},{"text":"无为转变","weight":1},{"text":"十划咒法（七海）","weight":1},{"text":"咒言","weight":1},{"text":"不义游戏","weight":1},{"text":"黑鸟操术","weight":1},{"text":"投射咒法","weight":1},{"text":"构筑术式","weight":1},{"text":"傀儡操术","weight":1},{"text":"付丧操术","weight":1},{"text":"降灵术（参拜婆）","weight":1},{"text":"刍灵咒法（野蔷薇）","weight":1},{"text":"星之怒（九十九）","weight":1},{"text":"冰凝咒法","weight":1},{"text":"不死（天元）","weight":1},{"text":"奇迹（重面春太）","weight":1},{"text":"漏壶","weight":1},{"text":"花御","weight":1},{"text":"陀艮","weight":1},{"text":"乐岩寺","weight":1},{"text":"蚀烂术式（坏相、血涂）","weight":1},{"text":"疱疮神","weight":1},{"text":"夺舍（羂索）","weight":1},{"text":"坐杀搏徒","weight":1},{"text":"诛伏赐死","weight":1},{"text":"超人（高羽）","weight":1},{"text":"模仿","weight":1},{"text":"天空术式（乌鹭）","weight":1},{"text":"石流龙","weight":1},{"text":"漫画家","weight":1},{"text":"反重力","weight":1},{"text":"天使","weight":1},{"text":"鹿紫云一","weight":1},{"text":"达布拉","weight":1},{"text":"混沌与调和","weight":1},{"text":"再契象","weight":1},{"text":"黄栌折","weight":1},{"text":"强弱颠倒","weight":1},{"text":"御厨子（宿傩）","weight":1},{"text":"星间飞行","weight":1},{"text":"忧忧","weight":1},{"text":"新田新","weight":1},{"text":"羽生（喷气背包头发）","weight":1},{"text":"羽场（直升机头发）","weight":1},{"text":"禅院甚一","weight":1},{"text":"禅院兰太","weight":1},{"text":"降灵术·来访瑞兽（猪也）","weight":1},{"text":"丽美（拿头发扎人，没别的）","weight":1},{"text":"多鲁布","weight":1},{"text":"自定义","weight":1},{"text":"淀月（顺平）","weight":1},{"text":"分身（神秘纸袋男）","weight":1},{"text":"胧绝","weight":1},{"text":"连锁纹（漆英司）","weight":1},{"text":"咒布操术（白仓飞鹰）","weight":1},{"text":"灾难逆转咒","weight":1},{"text":"咒炼础术","weight":1}],"title":"生得术式"},{"dbId":7,"items":[{"text":"正向天与咒缚（肉体残缺换咒力增强）","weight":1},{"text":"负向天与咒缚（咒力为零换肉体增强）","weight":1}],"title":"天与咒缚"},{"dbId":8,"items":[{"text":"SSS（超越天与暴君）","weight":10},{"text":"SS（天与暴君）","weight":30},{"text":"S（入学虎杖）","weight":30},{"text":"A（泰森）","weight":30},{"text":"B（运动员）","weight":30},{"text":"C（体育生）","weight":30},{"text":"D（普通人）","weight":30},{"text":"E（营养不良）","weight":30},{"text":"E-（正向天与咒缚肉身）","weight":20},{"text":"SSS+（脱离生物范畴）","weight":2}],"title":"肉体强度"},{"dbId":9,"items":[{"text":"日本","weight":50},{"text":"非洲","weight":10},{"text":"亚洲除日本外其他地方","weight":10},{"text":"美洲","weight":10},{"text":"欧洲","weight":10},{"text":"西姆利亚星（自动变成西姆利亚星人）","weight":3}],"title":"穿越后的地点"},{"dbId":19,"items":[{"text":"SSS（超越五宿级）","weight":5},{"text":"SS（五宿、虎杖、乙骨级）","weight":10},{"text":"S（伏黑）","weight":10},{"text":"A（一般一级术师）","weight":10},{"text":"B（一般二级术师）","weight":10},{"text":"C（一般三级术师）","weight":10},{"text":"D（正常人）","weight":10},{"text":"E（是否开智存疑）","weight":10},{"text":"E-（学不明白任何事）","weight":2}],"title":"天赋"},{"dbId":29,"items":[{"text":"领域展延","weight":5},{"text":"反转术式外放","weight":5},{"text":"术式反转","weight":5},{"text":"简易领域","weight":5},{"text":"黑闪（68虎水平）","weight":1},{"text":"极之番","weight":5},{"text":"领域展开","weight":5},{"text":"傀儡咒术学（指咒骸制作）","weight":5},{"text":"新阴流居合","weight":5},{"text":"制作咒具","weight":5},{"text":"帐","weight":18},{"text":"简易领域（相扑）","weight":4},{"text":"弥虚葛笼","weight":5},{"text":"无敌贷款王（会精明利用束缚）","weight":3},{"text":"迳庭拳","weight":5},{"text":"神秘农家乐（？）","weight":2},{"text":"黑闪（一级术师）","weight":5},{"text":"散成咒力（非咒灵则重抽）","weight":5}],"title":"会哪个高级技巧"},{"dbId":31,"items":[{"text":"六眼","weight":1},{"text":"双面四臂","weight":1},{"text":"天与咒缚","weight":1},{"text":"虎杖版超级受肉体（如已有则重抽）","weight":1},{"text":"半人半咒","weight":1},{"text":"西姆利亚星人血脉（只是血脉 如已有则重抽）","weight":1},{"text":"星浆体","weight":1},{"text":"咒骸","weight":1}],"title":"特殊天赋是"},{"dbId":35,"items":[{"text":"封闭式","weight":6},{"text":"开放式","weight":6},{"text":"开放封闭自由切换","weight":1},{"text":"未完成","weight":2}],"title":"领域类型"},{"dbId":36,"items":[{"text":"必中","weight":1},{"text":"自动攻击（宿傩）","weight":1},{"text":"增幅自身类（称金次）","weight":1},{"text":"增幅咒术类（乙骨）","weight":1},{"text":"打击灵魂类（虎杖）","weight":1},{"text":"强控类（五条）","weight":1},{"text":"规则类（日车）","weight":1}],"title":"领域效果"}]};
+    const STORAGE_KEY = 'decision-wheel-static-data-v4';
+    const LAST_INDEX_KEY = 'decision-wheel-static-last-index-v4';
+    const SEQUENCE_KEY = 'decision-wheel-static-sequence-v4';
+
+    const palette = [
+      '#7c9cff', '#8ef0ff', '#8ef7ae', '#ffd98e', '#ff9aa2', '#c9a7ff', '#78e3c4', '#ffb86c', '#84a9ff', '#f7a8ff', '#70d6ff', '#b8f28b'
+    ];
+
+    let state = {
+      data: loadData(),
+      filteredIndices: [],
+      currentIndex: 0,
+      rotation: 0,
+      spinning: false,
+      targetRotation: 0,
+      animFrame: null,
+      lastWinnerText: '—',
+      sequenceIndices: loadSequence(),
+      sequenceCursor: -1,
+      sequenceResults: [],
+      autoSequence: false,
+      awaitingSequenceNext: false,
+      pendingSequenceAdvance: null,
+      pendingWheelAdvance: null
+    };
+
+    const els = {
+      settingsToggle: document.getElementById('settingsToggle'),
+      searchInput: document.getElementById('searchInput'),
+      createWheelBtn: document.getElementById('createWheelBtn'),
+      addCurrentToSequenceBtn: document.getElementById('addCurrentToSequenceBtn'),
+      sequenceList: document.getElementById('sequenceList'),
+      wheelList: document.getElementById('wheelList'),
+      wheelCanvas: document.getElementById('wheelCanvas'),
+      wheelTitle: document.getElementById('wheelTitle'),
+      wheelMeta: document.getElementById('wheelMeta'),
+      wheelIndexPill: document.getElementById('wheelIndexPill'),
+      spinBtn: document.getElementById('spinBtn'),
+      nextSequenceBtn: document.getElementById('nextSequenceBtn'),
+      spinSequenceBtn: document.getElementById('spinSequenceBtn'),
+      spinSequenceStageBtn: document.getElementById('spinSequenceStageBtn'),
+      stopBtn: document.getElementById('stopBtn'),
+      stopSequenceBtn: document.getElementById('stopSequenceBtn'),
+      randomWheelBtn: document.getElementById('randomWheelBtn'),
+      copyResultBtn: document.getElementById('copyResultBtn'),
+      clearSequenceBtn: document.getElementById('clearSequenceBtn'),
+      resultBox: document.getElementById('resultBox'),
+      sequenceStatus: document.getElementById('sequenceStatus'),
+      sequenceImageWrap: document.getElementById('sequenceImageWrap'),
+      sequenceResultImage: document.getElementById('sequenceResultImage'),
+      downloadSequenceImage: document.getElementById('downloadSequenceImage'),
+      itemsCount: document.getElementById('itemsCount'),
+      totalWeight: document.getElementById('totalWeight'),
+      lastWinner: document.getElementById('lastWinner'),
+      titleInput: document.getElementById('titleInput'),
+      itemsEditor: document.getElementById('itemsEditor'),
+      addItemBtn: document.getElementById('addItemBtn'),
+      saveBtn: document.getElementById('saveBtn'),
+      exportCurrentBtn: document.getElementById('exportCurrentBtn'),
+      exportAllBtn: document.getElementById('exportAllBtn'),
+      resetCurrentBtn: document.getElementById('resetCurrentBtn'),
+      resetAllBtn: document.getElementById('resetAllBtn')
+    };
+
+    const ctx = els.wheelCanvas.getContext('2d');
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      return structuredClone(ORIGINAL_DATA);
+    }
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data));
+    }
+
+    function loadSequence() {
+      try {
+        const raw = localStorage.getItem(SEQUENCE_KEY);
+        if (!raw) return getDefaultSequenceIndices();
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return getDefaultSequenceIndices();
+        return parsed.map(Number).filter(Number.isInteger);
+      } catch (e) {
+        return getDefaultSequenceIndices();
+      }
+    }
+
+    function getDefaultSequenceIndices() {
+      const sequenceDbIds = ORIGINAL_DATA.settings?.sequenceDbIds;
+      if (Array.isArray(sequenceDbIds) && sequenceDbIds.length) {
+        const indexByDbId = new Map(ORIGINAL_DATA.wheels.map((wheel, index) => [wheel.dbId, index]));
+        const indices = sequenceDbIds
+          .map(dbId => indexByDbId.get(dbId))
+          .filter(index => Number.isInteger(index));
+        if (indices.length) return indices;
+      }
+      return ORIGINAL_DATA.wheels.map((_, index) => index);
+    }
+
+    function saveSequence() {
+      localStorage.setItem(SEQUENCE_KEY, JSON.stringify(state.sequenceIndices));
+    }
+
+    function sanitizeWheel(wheel) {
+      wheel.title = (wheel.title || '未命名转盘').trim() || '未命名转盘';
+      wheel.items = (wheel.items || []).map(item => ({
+        text: String(item.text ?? '').trim() || '未命名选项',
+        weight: Math.max(1, Number(item.weight) || 1)
+      })).filter(Boolean);
+      if (!wheel.items.length) wheel.items = [{ text: '默认选项', weight: 1 }];
+      return wheel;
+    }
+
+    function getCurrentWheel() {
+      return state.data.wheels[state.currentIndex];
+    }
+
+    function totalWeightOf(wheel) {
+      return wheel.items.reduce((sum, item) => sum + Math.max(1, Number(item.weight) || 1), 0);
+    }
+
+    function getWheelOrderNumber(index) {
+      const pos = state.sequenceIndices.indexOf(index);
+      return pos >= 0 ? pos + 1 : null;
+    }
+
+    function isWheelInSequence(index) {
+      return getWheelOrderNumber(index) !== null;
+    }
+
+    function addWheelToSequence(index) {
+      if (isWheelInSequence(index)) return false;
+      state.sequenceIndices.push(index);
+      state.sequenceResults = [];
+      state.autoSequence = false;
+      state.awaitingSequenceNext = false;
+      state.sequenceCursor = -1;
+      hideSequenceResultImage();
+      setNextSequenceButtonVisible(false);
+      saveSequence();
+      renderSequenceList();
+      renderWheelList();
+      return true;
+    }
+
+    function removeWheelFromSequence(index) {
+      const pos = state.sequenceIndices.indexOf(index);
+      if (pos < 0) return;
+      state.sequenceIndices.splice(pos, 1);
+      state.sequenceResults = [];
+      state.autoSequence = false;
+      state.awaitingSequenceNext = false;
+      state.sequenceCursor = -1;
+      hideSequenceResultImage();
+      setNextSequenceButtonVisible(false);
+      saveSequence();
+      renderSequenceList();
+      renderWheelList();
+    }
+
+    function moveSequenceItem(pos, delta) {
+      const next = pos + delta;
+      if (pos < 0 || pos >= state.sequenceIndices.length) return;
+      if (next < 0 || next >= state.sequenceIndices.length) return;
+      const arr = state.sequenceIndices;
+      [arr[pos], arr[next]] = [arr[next], arr[pos]];
+      state.sequenceResults = [];
+      state.autoSequence = false;
+      state.awaitingSequenceNext = false;
+      state.sequenceCursor = -1;
+      hideSequenceResultImage();
+      setNextSequenceButtonVisible(false);
+      saveSequence();
+      renderSequenceList();
+      renderWheelList();
+    }
+
+    function clearSequence(shouldConfirm = true) {
+      if (shouldConfirm && !confirm('确定清空多转盘顺序列表吗？')) return;
+      stopSequenceRun(false);
+      state.sequenceIndices = [];
+      state.sequenceResults = [];
+      hideSequenceResultImage();
+      setNextSequenceButtonVisible(false);
+      saveSequence();
+      renderSequenceList();
+      renderWheelList();
+    }
+
+    function normalizeSequenceIndices() {
+      state.sequenceIndices = state.sequenceIndices
+        .map(Number)
+        .filter(index => Number.isInteger(index) && index >= 0 && index < state.data.wheels.length);
+      saveSequence();
+    }
+
+    function renderSequenceList() {
+      normalizeSequenceIndices();
+      els.sequenceList.innerHTML = '';
+      if (!state.sequenceIndices.length) {
+        els.sequenceList.innerHTML = '<div class="mini">还没有加入任何转盘。先在左侧新增或把当前转盘加入顺序。</div>';
+        renderSequenceStatus();
+        return;
+      }
+      state.sequenceIndices.forEach((wheelIndex, pos) => {
+        const wheel = state.data.wheels[wheelIndex];
+        const div = document.createElement('div');
+        div.className = 'seq-item';
+        div.innerHTML = `
+          <div class="seq-main">
+            <span class="seq-badge">${pos + 1}</span>
+            <div class="seq-title" title="${escapeAttr(wheel.title)}">${escapeHtml(wheel.title)}</div>
+          </div>
+          <div class="seq-actions">
+            <button class="secondary tiny-btn" data-action="locate" data-pos="${pos}">看</button>
+            <button class="secondary tiny-btn" data-action="up" data-pos="${pos}">↑</button>
+            <button class="secondary tiny-btn" data-action="down" data-pos="${pos}">↓</button>
+            <button class="danger tiny-btn" data-action="remove" data-pos="${pos}">删</button>
+          </div>
+        `;
+        els.sequenceList.appendChild(div);
+      });
+
+      els.sequenceList.querySelectorAll('button[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const pos = Number(btn.dataset.pos);
+          const action = btn.dataset.action;
+          if (action === 'locate') {
+            state.currentIndex = state.sequenceIndices[pos];
+            state.rotation = 0;
+            localStorage.setItem(LAST_INDEX_KEY, String(state.currentIndex));
+            renderWheelList();
+            renderCurrent();
+          }
+          if (action === 'up') moveSequenceItem(pos, -1);
+          if (action === 'down') moveSequenceItem(pos, 1);
+          if (action === 'remove') {
+            state.sequenceIndices.splice(pos, 1);
+            saveSequence();
+            renderSequenceList();
+            renderWheelList();
+          }
+        });
+      });
+
+      renderSequenceStatus();
+    }
+
+    function renderSequenceStatus() {
+      if (!state.sequenceIndices.length) {
+        els.sequenceStatus.textContent = '当前未开始顺序抽奖。';
+        return;
+      }
+      const names = state.sequenceIndices.map((index, pos) => `${pos + 1}.${state.data.wheels[index].title}`).join(' → ');
+      if (state.autoSequence) {
+        const currentPos = Math.max(0, state.sequenceCursor + 1);
+        const statusText = state.awaitingSequenceNext ? '等待手动进入下一个转盘' : '抽奖进行中';
+        els.sequenceStatus.innerHTML = `${statusText}：第 <strong>${currentPos}</strong> / <strong>${state.sequenceIndices.length}</strong> 个。<br>${escapeHtml(names)}`;
+      } else if (state.sequenceResults.length) {
+        const resultText = state.sequenceResults.map((x, i) => `${i + 1}. ${x.wheelTitle} → ${x.result}`).join(' ｜ ');
+        els.sequenceStatus.innerHTML = `已配置顺序：${escapeHtml(names)}<br>上次顺序结果：${escapeHtml(resultText)}`;
+      } else {
+        els.sequenceStatus.innerHTML = `已配置顺序：${escapeHtml(names)}`;
+      }
+    }
+
+    function applyFilter() {
+      clearPendingWheelAdvance();
+      const q = els.searchInput.value.trim().toLowerCase();
+      state.filteredIndices = state.data.wheels
+        .map((wheel, index) => ({ wheel, index }))
+        .filter(x => !q || (x.wheel.title || '').toLowerCase().includes(q))
+        .map(x => x.index);
+
+      if (!state.filteredIndices.includes(state.currentIndex)) {
+        state.currentIndex = state.filteredIndices[0] ?? 0;
+      }
+      renderWheelList();
+      renderCurrent();
+    }
+
+    function renderWheelList() {
+      els.wheelList.innerHTML = '';
+      if (!state.filteredIndices.length) {
+        els.wheelList.innerHTML = '<div class="mini">没有匹配的转盘。</div>';
+        return;
+      }
+      state.filteredIndices.forEach(index => {
+        const wheel = state.data.wheels[index];
+        const div = document.createElement('div');
+        div.className = 'wheel-card' + (index === state.currentIndex ? ' active' : '');
+        const orderNo = getWheelOrderNumber(index);
+        const inSequence = orderNo !== null;
+        div.innerHTML = `
+          <div class="wheel-card-top">
+            <div class="t">${escapeHtml(wheel.title)}</div>
+            ${orderNo ? `<div class="wheel-order-tag">顺序 ${orderNo}</div>` : ''}
+          </div>
+          <div class="m">${wheel.items.length} 个选项 · 总权重 ${totalWeightOf(wheel)}</div>
+          <div class="wheel-card-bottom">
+            <button class="secondary tiny-btn add-seq-btn" data-action="add-sequence" data-index="${index}">${inSequence ? '已在顺序' : '加入顺序'}</button>
+          </div>
+        `;
+        div.addEventListener('click', () => {
+          clearPendingWheelAdvance();
+          state.currentIndex = index;
+          localStorage.setItem(LAST_INDEX_KEY, String(index));
+          state.rotation = 0;
+          renderWheelList();
+          renderCurrent();
+        });
+        const addBtn = div.querySelector('button[data-action="add-sequence"]');
+        addBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const added = addWheelToSequence(index);
+          els.resultBox.textContent = added ? `已把“${wheel.title}”加入顺序列表。` : `“${wheel.title}”已经在顺序列表里了。`;
+          renderWheelList();
+        });
+        els.wheelList.appendChild(div);
+      });
+    }
+
+    function renderCurrent() {
+      const wheel = sanitizeWheel(structuredClone(getCurrentWheel()));
+      state.data.wheels[state.currentIndex] = wheel;
+      const totalWeight = totalWeightOf(wheel);
+      els.wheelTitle.textContent = wheel.title;
+      els.wheelMeta.textContent = `${wheel.items.length} 个选项 · 总权重 ${totalWeight} · 按顶部指针为最终结果`;
+      els.wheelIndexPill.textContent = `#${state.currentIndex + 1} / ${state.data.wheels.length}`;
+      els.itemsCount.textContent = wheel.items.length;
+      els.totalWeight.textContent = totalWeight;
+      els.lastWinner.textContent = state.lastWinnerText;
+      els.titleInput.value = wheel.title;
+      renderItemsEditor();
+      renderSequenceList();
+      drawWheel();
+    }
+
+    function renderItemsEditor() {
+      const wheel = getCurrentWheel();
+      els.itemsEditor.innerHTML = '';
+      wheel.items.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = 'item-row';
+        row.innerHTML = `
+          <input type="text" value="${escapeAttr(item.text)}" data-type="text" data-index="${idx}" placeholder="选项名称" />
+          <input type="text" value="${escapeAttr(String(item.weight))}" data-type="weight" data-index="${idx}" placeholder="权重" />
+          <button class="danger" data-action="delete" data-index="${idx}">删</button>
+        `;
+        els.itemsEditor.appendChild(row);
+      });
+
+      els.itemsEditor.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', e => {
+          const idx = Number(e.target.dataset.index);
+          const type = e.target.dataset.type;
+          if (type === 'text') getCurrentWheel().items[idx].text = e.target.value;
+          if (type === 'weight') getCurrentWheel().items[idx].weight = Math.max(1, Number(e.target.value) || 1);
+          renderCurrent();
+          saveData();
+        });
+      });
+
+      els.itemsEditor.querySelectorAll('button[data-action="delete"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.dataset.index);
+          const wheel = getCurrentWheel();
+          if (wheel.items.length <= 1) {
+            alert('至少保留 1 个选项。');
+            return;
+          }
+          wheel.items.splice(idx, 1);
+          renderCurrent();
+          renderWheelList();
+          saveData();
+        });
+      });
+    }
+
+    function drawWheel() {
+      const wheel = getCurrentWheel();
+      const items = wheel.items;
+      const width = els.wheelCanvas.width;
+      const height = els.wheelCanvas.height;
+      const cx = width / 2;
+      const cy = height / 2;
+      const radius = Math.min(width, height) * 0.42;
+      const innerRadius = radius * 0.14;
+      const totalWeight = totalWeightOf(wheel);
+
+      ctx.clearRect(0, 0, width, height);
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(state.rotation - Math.PI / 2);
+
+      let startAngle = 0;
+      items.forEach((item, index) => {
+        const sliceAngle = (Math.max(1, Number(item.weight) || 1) / totalWeight) * Math.PI * 2;
+        const endAngle = startAngle + sliceAngle;
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, radius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = palette[index % palette.length];
+        ctx.globalAlpha = 0.96;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+        ctx.stroke();
+
+        const textAngle = startAngle + sliceAngle / 2;
+        ctx.save();
+        ctx.rotate(textAngle);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#0f1221';
+        ctx.font = 'bold 34px sans-serif';
+        const label = fitText(item.text, 16);
+        wrapWheelText(label, radius * 0.84, 0, 36);
+        ctx.restore();
+
+        startAngle = endAngle;
+      });
+
+      ctx.beginPath();
+      ctx.arc(0, 0, innerRadius, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+      ctx.lineWidth = 10;
+      ctx.strokeStyle = 'rgba(124,156,255,0.8)';
+      ctx.stroke();
+
+      ctx.restore();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius + 8, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+      ctx.lineWidth = 12;
+      ctx.stroke();
+    }
+
+    function wrapWheelText(text, x, y, lineHeight) {
+      const maxChars = 8;
+      const lines = [];
+      for (let i = 0; i < text.length; i += maxChars) lines.push(text.slice(i, i + maxChars));
+      const totalHeight = (lines.length - 1) * lineHeight;
+      lines.forEach((line, idx) => {
+        ctx.fillText(line, x, y + idx * lineHeight - totalHeight / 2);
+      });
+    }
+
+    function fitText(text, maxLen) {
+      const str = String(text || '');
+      return str.length > maxLen ? str.slice(0, maxLen - 1) + '…' : str;
+    }
+
+    function weightedPickIndex(items) {
+      const total = items.reduce((s, it) => s + Math.max(1, Number(it.weight) || 1), 0);
+      let r = Math.random() * total;
+      for (let i = 0; i < items.length; i++) {
+        r -= Math.max(1, Number(items[i].weight) || 1);
+        if (r <= 0) return i;
+      }
+      return items.length - 1;
+    }
+
+    function getSliceCenterAngle(items, winIndex) {
+      const total = items.reduce((s, it) => s + Math.max(1, Number(it.weight) || 1), 0);
+      let start = 0;
+      for (let i = 0; i < items.length; i++) {
+        const slice = (Math.max(1, Number(items[i].weight) || 1) / total) * Math.PI * 2;
+        const end = start + slice;
+        if (i === winIndex) return start + slice / 2;
+        start = end;
+      }
+      return 0;
+    }
+
+    function spinWheel(meta = {}) {
+      if (state.spinning) return;
+      clearPendingWheelAdvance();
+      const wheel = getCurrentWheel();
+      const winIndex = weightedPickIndex(wheel.items);
+      const center = getSliceCenterAngle(wheel.items, winIndex);
+      const fullTurns = (5 + Math.floor(Math.random() * 3)) * Math.PI * 2;
+      const target = fullTurns + (Math.PI * 2 - center);
+      animateSpin(target, wheel.items[winIndex].text, {
+        wheelIndex: state.currentIndex,
+        wheelTitle: wheel.title,
+        sequenceMode: !!meta.sequenceMode
+      });
+    }
+
+    function animateSpin(delta, winnerText, meta = {}) {
+      state.spinning = true;
+      els.spinBtn.disabled = true;
+      els.spinSequenceBtn.disabled = true;
+      els.nextSequenceBtn.disabled = true;
+      if (els.spinSequenceStageBtn) els.spinSequenceStageBtn.disabled = true;
+      const startRotation = state.rotation % (Math.PI * 2);
+      const startTime = performance.now();
+      const duration = 4800;
+      cancelAnimationFrame(state.animFrame);
+
+      function frame(now) {
+        const t = Math.min(1, (now - startTime) / duration);
+        const ease = 1 - Math.pow(1 - t, 4);
+        state.rotation = startRotation + delta * ease;
+        drawWheel();
+        if (t < 1 && state.spinning) {
+          state.animFrame = requestAnimationFrame(frame);
+        } else {
+          state.spinning = false;
+          els.spinBtn.disabled = false;
+          els.spinSequenceBtn.disabled = false;
+          els.nextSequenceBtn.disabled = !state.awaitingSequenceNext;
+          if (els.spinSequenceStageBtn) els.spinSequenceStageBtn.disabled = false;
+          finishSpin(winnerText, meta);
+        }
+      }
+      state.animFrame = requestAnimationFrame(frame);
+    }
+
+    function stopSpinImmediately() {
+      if (!state.spinning) return;
+      state.spinning = false;
+      cancelAnimationFrame(state.animFrame);
+      els.spinBtn.disabled = false;
+      els.spinSequenceBtn.disabled = false;
+      els.nextSequenceBtn.disabled = !state.awaitingSequenceNext;
+      if (els.spinSequenceStageBtn) els.spinSequenceStageBtn.disabled = false;
+      const winner = getWinnerByRotation();
+      finishSpin(winner.text, {
+        wheelIndex: state.currentIndex,
+        wheelTitle: getCurrentWheel().title,
+        sequenceMode: state.autoSequence
+      });
+      drawWheel();
+    }
+
+    function getWinnerByRotation() {
+      const wheel = getCurrentWheel();
+      const items = wheel.items;
+      const total = totalWeightOf(wheel);
+      let normalized = ((Math.PI * 2 - (state.rotation % (Math.PI * 2))) + Math.PI * 2) % (Math.PI * 2);
+      let acc = 0;
+      for (let i = 0; i < items.length; i++) {
+        const slice = (Math.max(1, Number(items[i].weight) || 1) / total) * Math.PI * 2;
+        if (normalized >= acc && normalized < acc + slice) return items[i];
+        acc += slice;
+      }
+      return items[items.length - 1];
+    }
+
+    function finishSpin(text, meta = {}) {
+      state.lastWinnerText = text;
+      els.lastWinner.textContent = text;
+      const title = meta.wheelTitle || getCurrentWheel().title;
+      els.resultBox.innerHTML = `🎉 <strong>${escapeHtml(title)}</strong> ：<strong>${escapeHtml(text)}</strong>`;
+
+      if (meta.sequenceMode || state.autoSequence) {
+        state.awaitingSequenceNext = true;
+        state.sequenceResults.push({
+          wheelIndex: meta.wheelIndex ?? state.currentIndex,
+          wheelTitle: title,
+          result: text
+        });
+        renderSequenceStatus();
+        handleSequenceStepFinished();
+      } else {
+        renderSequenceStatus();
+      }
+    }
+
+    function clearPendingWheelAdvance() {
+      clearTimeout(state.pendingWheelAdvance);
+      state.pendingWheelAdvance = null;
+    }
+
+    function hideSequenceResultImage() {
+      els.sequenceImageWrap.classList.remove('show');
+      els.sequenceResultImage.removeAttribute('src');
+      els.downloadSequenceImage.removeAttribute('href');
+    }
+
+    function wrapCanvasText(drawCtx, text, maxWidth) {
+      const chars = String(text || '');
+      const lines = [];
+      let line = '';
+      for (const char of chars) {
+        const testLine = line + char;
+        if (line && drawCtx.measureText(testLine).width > maxWidth) {
+          lines.push(line);
+          line = char;
+        } else {
+          line = testLine;
+        }
+      }
+      if (line) lines.push(line);
+      return lines.length ? lines : [''];
+    }
+
+    function roundedRectPath(drawCtx, x, y, width, height, radius) {
+      const r = Math.min(radius, width / 2, height / 2);
+      drawCtx.moveTo(x + r, y);
+      drawCtx.lineTo(x + width - r, y);
+      drawCtx.quadraticCurveTo(x + width, y, x + width, y + r);
+      drawCtx.lineTo(x + width, y + height - r);
+      drawCtx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+      drawCtx.lineTo(x + r, y + height);
+      drawCtx.quadraticCurveTo(x, y + height, x, y + height - r);
+      drawCtx.lineTo(x, y + r);
+      drawCtx.quadraticCurveTo(x, y, x + r, y);
+    }
+
+    function formatSequenceSummaryHtml() {
+      const items = state.sequenceResults.map(item => `
+        <li><strong>${escapeHtml(item.wheelTitle)}</strong> → ${escapeHtml(item.result)}</li>
+      `).join('');
+      return `
+        <div class="sequence-summary">
+          <div class="sequence-summary-title">✅ 顺序抽奖完成：</div>
+          <ol class="sequence-summary-list">${items}</ol>
+        </div>
+      `;
+    }
+
+    function triggerSequenceImageDownload() {
+      if (!els.downloadSequenceImage.href || els.downloadSequenceImage.href === '#') return;
+      els.downloadSequenceImage.click();
+    }
+
+    function generateSequenceResultImage() {
+      if (!state.sequenceResults.length) return;
+
+      const canvas = document.createElement('canvas');
+      const imageCtx = canvas.getContext('2d');
+      const width = 1400;
+      const padding = 54;
+      const cardX = 34;
+      const cardY = 34;
+      const cardW = width - cardX * 2;
+      const itemGap = 34;
+      const columns = state.sequenceResults.length >= 10 ? 2 : 1;
+      const columnGap = 52;
+      const columnW = (cardW - padding * 2 - columnGap * (columns - 1)) / columns;
+      const lineHeight = 34;
+
+      imageCtx.font = '700 28px "Microsoft YaHei", "PingFang SC", sans-serif';
+      const items = state.sequenceResults.map((item, index) => {
+        const lines = wrapCanvasText(imageCtx, `${index + 1}. ${item.wheelTitle} → ${item.result}`, columnW);
+        return { index, lines };
+      });
+
+      const rowsPerColumn = Math.ceil(items.length / columns);
+      const columnHeights = Array.from({ length: columns }, (_, columnIndex) => {
+        const start = columnIndex * rowsPerColumn;
+        const end = Math.min(items.length, start + rowsPerColumn);
+        return items.slice(start, end).reduce((sum, item) => sum + item.lines.length * lineHeight + itemGap, 0);
+      });
+      const contentHeight = Math.max(...columnHeights, 0);
+      const titleHeight = 54;
+      const height = cardY * 2 + padding * 2 + titleHeight + contentHeight;
+      canvas.width = width;
+      canvas.height = height;
+
+      imageCtx.fillStyle = '#202432';
+      imageCtx.fillRect(0, 0, width, height);
+
+      imageCtx.fillStyle = '#344247';
+      imageCtx.strokeStyle = '#93a4a8';
+      imageCtx.lineWidth = 2;
+      imageCtx.beginPath();
+      roundedRectPath(imageCtx, cardX, cardY, cardW, height - cardY * 2, 28);
+      imageCtx.fill();
+      imageCtx.stroke();
+
+      imageCtx.fillStyle = '#8ef7ae';
+      imageCtx.font = '700 30px "Microsoft YaHei", "PingFang SC", sans-serif';
+      imageCtx.fillText('✅ 顺序抽奖完成：', cardX + padding, cardY + padding);
+
+      imageCtx.fillStyle = '#f4f7ff';
+      imageCtx.font = '700 28px "Microsoft YaHei", "PingFang SC", sans-serif';
+      for (let columnIndex = 0; columnIndex < columns; columnIndex++) {
+        const start = columnIndex * rowsPerColumn;
+        const end = Math.min(items.length, start + rowsPerColumn);
+        let y = cardY + padding + titleHeight;
+        const x = cardX + padding + columnIndex * (columnW + columnGap);
+        items.slice(start, end).forEach(item => {
+          item.lines.forEach(line => {
+            imageCtx.fillText(line, x, y);
+            y += lineHeight;
+          });
+          y += itemGap;
+        });
+      }
+
+      const url = canvas.toDataURL('image/png');
+      els.sequenceResultImage.src = url;
+      els.downloadSequenceImage.href = url;
+      els.downloadSequenceImage.download = `顺序抽奖结果_${new Date().toISOString().slice(0, 10)}.png`;
+      els.sequenceImageWrap.classList.add('show');
+      els.sequenceImageWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      setTimeout(triggerSequenceImageDownload, 80);
+    }
+
+    function startSequenceRun() {
+      if (state.spinning) return;
+      if (state.autoSequence) return;
+      clearPendingWheelAdvance();
+      normalizeSequenceIndices();
+      if (!state.sequenceIndices.length) {
+        alert('请先把至少 1 个转盘加入顺序列表。');
+        return;
+      }
+      clearTimeout(state.pendingSequenceAdvance);
+      state.autoSequence = true;
+      state.awaitingSequenceNext = false;
+      state.sequenceCursor = 0;
+      state.sequenceResults = [];
+      hideSequenceResultImage();
+      setNextSequenceButtonVisible(false);
+      state.currentIndex = state.sequenceIndices[0];
+      state.rotation = 0;
+      localStorage.setItem(LAST_INDEX_KEY, String(state.currentIndex));
+      renderWheelList();
+      renderCurrent();
+      spinWheel({ sequenceMode: true });
+    }
+
+    function setNextSequenceButtonVisible(isVisible) {
+      els.nextSequenceBtn.hidden = !isVisible;
+      els.nextSequenceBtn.disabled = !isVisible;
+    }
+
+    function handleSequenceStepFinished() {
+      if (!state.autoSequence) return;
+      clearTimeout(state.pendingSequenceAdvance);
+      if (state.sequenceCursor >= state.sequenceIndices.length - 1) {
+        state.autoSequence = false;
+        state.awaitingSequenceNext = false;
+        state.sequenceCursor = -1;
+        setNextSequenceButtonVisible(false);
+        renderSequenceList();
+        renderSequenceStatus();
+        els.resultBox.innerHTML = formatSequenceSummaryHtml();
+        generateSequenceResultImage();
+        return;
+      }
+      setNextSequenceButtonVisible(true);
+      els.resultBox.innerHTML += `<span class="mini">点击“下一个转盘”继续按设置顺序抽奖。</span>`;
+    }
+
+    function goToNextSequenceWheel() {
+      if (!state.autoSequence || !state.awaitingSequenceNext || state.spinning) return;
+      if (state.sequenceCursor >= state.sequenceIndices.length - 1) return;
+      state.awaitingSequenceNext = false;
+      setNextSequenceButtonVisible(false);
+      state.sequenceCursor += 1;
+      state.currentIndex = state.sequenceIndices[state.sequenceCursor];
+      state.rotation = 0;
+      localStorage.setItem(LAST_INDEX_KEY, String(state.currentIndex));
+      renderWheelList();
+      renderCurrent();
+      spinWheel({ sequenceMode: true });
+    }
+
+    function stopSequenceRun(stopCurrentSpin = true) {
+      clearTimeout(state.pendingSequenceAdvance);
+      const hadSequence = state.autoSequence || state.sequenceCursor >= 0;
+      state.autoSequence = false;
+      state.awaitingSequenceNext = false;
+      state.sequenceCursor = -1;
+      setNextSequenceButtonVisible(false);
+      if (stopCurrentSpin && state.spinning) {
+        stopSpinImmediately();
+      } else {
+        renderSequenceList();
+        renderSequenceStatus();
+      }
+      if (hadSequence) {
+        els.resultBox.textContent = '已停止顺序抽奖。';
+      }
+    }
+
+    function exportJson(filename, obj) {
+      const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function buildExportAllData() {
+      normalizeSequenceIndices();
+      const orderedIndices = [];
+      const seen = new Set();
+
+      state.sequenceIndices.forEach(index => {
+        if (index >= 0 && index < state.data.wheels.length && !seen.has(index)) {
+          orderedIndices.push(index);
+          seen.add(index);
+        }
+      });
+
+      const wheels = orderedIndices.map(index => structuredClone(state.data.wheels[index]));
+      const sequenceDbIds = state.sequenceIndices
+        .map(index => state.data.wheels[index]?.dbId)
+        .filter(dbId => dbId !== undefined && dbId !== null);
+
+      return {
+        exportTime: Date.now(),
+        version: Math.max(4, Number(state.data.version) || 0),
+        settings: {
+          sequenceDbIds,
+          currentWheelDbId: getCurrentWheel()?.dbId ?? null
+        },
+        wheels
+      };
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function escapeAttr(str) { return escapeHtml(str); }
+
+    function randomChooseWheel() {
+      clearPendingWheelAdvance();
+      normalizeSequenceIndices();
+      const sequenceSet = new Set(state.sequenceIndices);
+      const pool = (state.filteredIndices.length ? state.filteredIndices : state.sequenceIndices)
+        .filter(index => sequenceSet.has(index));
+      if (!pool.length) {
+        els.resultBox.textContent = '顺序列表为空，请先在设置里加入要参与的转盘。';
+        return;
+      }
+      state.currentIndex = pool[Math.floor(Math.random() * pool.length)];
+      state.rotation = 0;
+      localStorage.setItem(LAST_INDEX_KEY, String(state.currentIndex));
+      renderWheelList();
+      renderCurrent();
+    }
+
+    function createNewWheel() {
+      clearPendingWheelAdvance();
+      const nextDbId = state.data.wheels.reduce((max, wheel) => Math.max(max, Number(wheel.dbId) || 0), 0) + 1;
+      const newWheel = sanitizeWheel({
+        dbId: nextDbId,
+        title: `新转盘 ${state.data.wheels.length + 1}`,
+        items: [
+          { text: '选项 1', weight: 1 },
+          { text: '选项 2', weight: 1 }
+        ]
+      });
+      state.data.wheels.push(newWheel);
+      state.currentIndex = state.data.wheels.length - 1;
+      state.rotation = 0;
+      saveData();
+      localStorage.setItem(LAST_INDEX_KEY, String(state.currentIndex));
+      applyFilter();
+      els.resultBox.textContent = '已新增一个新转盘，你可以直接修改标题和选项。';
+    }
+
+    function saveTitleAndSanitize() {
+      const wheel = getCurrentWheel();
+      wheel.title = els.titleInput.value.trim() || '未命名转盘';
+      sanitizeWheel(wheel);
+      saveData();
+      renderWheelList();
+      renderCurrent();
+    }
+
+    function resetCurrentWheel() {
+      if (!confirm('确定恢复当前转盘到最初导入状态吗？')) return;
+      clearPendingWheelAdvance();
+      state.data.wheels[state.currentIndex] = structuredClone(ORIGINAL_DATA.wheels[state.currentIndex]);
+      saveData();
+      renderWheelList();
+      renderCurrent();
+      els.resultBox.textContent = '当前转盘已恢复。';
+    }
+
+    function resetAllLocalChanges() {
+      if (!confirm('确定清空所有本地修改并恢复全部初始数据吗？')) return;
+      clearPendingWheelAdvance();
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(SEQUENCE_KEY);
+      state.data = structuredClone(ORIGINAL_DATA);
+      state.sequenceIndices = [];
+      state.sequenceResults = [];
+      hideSequenceResultImage();
+      state.rotation = 0;
+      state.lastWinnerText = '—';
+      state.autoSequence = false;
+      state.awaitingSequenceNext = false;
+      state.sequenceCursor = -1;
+      setNextSequenceButtonVisible(false);
+      renderWheelList();
+      renderCurrent();
+      els.resultBox.textContent = '全部本地改动已清空。';
+    }
+
+    function setSettingsOpen(isOpen) {
+      document.body.classList.toggle('settings-open', isOpen);
+      els.settingsToggle.textContent = isOpen ? '收起' : '设置';
+      els.settingsToggle.setAttribute('aria-expanded', String(isOpen));
+      requestAnimationFrame(drawWheel);
+    }
+
+    function init() {
+      const savedIndex = Number(localStorage.getItem(LAST_INDEX_KEY));
+      if (Number.isFinite(savedIndex) && savedIndex >= 0 && savedIndex < state.data.wheels.length) {
+        state.currentIndex = savedIndex;
+      }
+      state.data.wheels = state.data.wheels.map(w => sanitizeWheel(w));
+
+      normalizeSequenceIndices();
+      if (state.sequenceIndices.length && !state.sequenceIndices.includes(state.currentIndex)) {
+        state.currentIndex = state.sequenceIndices[0];
+        localStorage.setItem(LAST_INDEX_KEY, String(state.currentIndex));
+      }
+      els.settingsToggle.addEventListener('click', () => {
+        setSettingsOpen(!document.body.classList.contains('settings-open'));
+      });
+      els.searchInput.addEventListener('input', applyFilter);
+      els.createWheelBtn.addEventListener('click', createNewWheel);
+      els.addCurrentToSequenceBtn.addEventListener('click', () => {
+        const added = addWheelToSequence(state.currentIndex);
+        els.resultBox.textContent = added ? '当前转盘已加入顺序列表。' : '当前转盘已经在顺序列表里了。';
+      });
+      els.spinBtn.addEventListener('click', () => {
+        normalizeSequenceIndices();
+        if (state.sequenceIndices.length && !state.autoSequence) {
+          startSequenceRun();
+          return;
+        }
+        if (state.autoSequence && state.awaitingSequenceNext) return;
+        spinWheel({ sequenceMode: state.autoSequence });
+      });
+      els.nextSequenceBtn.addEventListener('click', goToNextSequenceWheel);
+      els.spinSequenceBtn.addEventListener('click', startSequenceRun);
+      if (els.spinSequenceStageBtn) els.spinSequenceStageBtn.addEventListener('click', startSequenceRun);
+      els.stopBtn.addEventListener('click', stopSpinImmediately);
+      els.stopSequenceBtn.addEventListener('click', () => stopSequenceRun(true));
+      els.randomWheelBtn.addEventListener('click', randomChooseWheel);
+      els.clearSequenceBtn.addEventListener('click', () => clearSequence(true));
+      els.copyResultBtn.addEventListener('click', async () => {
+        const text = state.lastWinnerText && state.lastWinnerText !== '—' ? state.lastWinnerText : '暂时还没有抽取结果';
+        try {
+          await navigator.clipboard.writeText(text);
+          els.resultBox.textContent = `已复制：${text}`;
+        } catch {
+          els.resultBox.textContent = '复制失败，请手动复制结果。';
+        }
+      });
+
+      els.titleInput.addEventListener('change', saveTitleAndSanitize);
+      els.saveBtn.addEventListener('click', saveTitleAndSanitize);
+      els.addItemBtn.addEventListener('click', () => {
+        getCurrentWheel().items.push({ text: `新选项 ${getCurrentWheel().items.length + 1}`, weight: 1 });
+        saveData();
+        renderWheelList();
+        renderCurrent();
+      });
+      els.exportCurrentBtn.addEventListener('click', () => exportJson(`当前转盘_${safeFilename(getCurrentWheel().title)}.json`, getCurrentWheel()));
+      els.exportAllBtn.addEventListener('click', () => exportJson('大转盘小决定_全部数据.json', buildExportAllData()));
+      els.resetCurrentBtn.addEventListener('click', resetCurrentWheel);
+      els.resetAllBtn.addEventListener('click', resetAllLocalChanges);
+
+      applyFilter();
+      renderSequenceList();
+    }
+
+    function safeFilename(name) {
+      return String(name).replace(/[\/:*?"<>|]+/g, '_').slice(0, 50) || '未命名';
+    }
+
+    init();
+  </script>
+</body>
+</html>
+
+
+
