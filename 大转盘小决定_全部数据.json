@@ -1,0 +1,749 @@
+{
+  "exportTime": 1776706813513,
+  "version": 4,
+  "settings": {
+    "sequenceDbIds": [
+      128,
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      8,
+      9,
+      19,
+      29,
+      31,
+      35,
+      36
+    ],
+    "currentWheelDbId": 6
+  },
+  "wheels": [
+    {
+      "dbId": 128,
+      "title": "你的BGM是",
+      "items": [
+        {
+          "text": "AIZO",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "dbId": 1,
+      "items": [
+        {
+          "text": "咒术师",
+          "weight": 10
+        },
+        {
+          "text": "诅咒师",
+          "weight": 10
+        },
+        {
+          "text": "普通人",
+          "weight": 10
+        },
+        {
+          "text": "咒术高层（御三家）",
+          "weight": 5
+        },
+        {
+          "text": "咒灵",
+          "weight": 5
+        }
+      ],
+      "title": "穿越后的初始身份"
+    },
+    {
+      "dbId": 2,
+      "items": [
+        {
+          "text": "千年前平安时代",
+          "weight": 4
+        },
+        {
+          "text": "怀玉时期",
+          "weight": 10
+        },
+        {
+          "text": "剧情开始时",
+          "weight": 10
+        },
+        {
+          "text": "涩谷事变时期",
+          "weight": 10
+        },
+        {
+          "text": "死灭回游时期",
+          "weight": 10
+        },
+        {
+          "text": "新宿决战时期",
+          "weight": 10
+        },
+        {
+          "text": "68年后外传",
+          "weight": 2
+        },
+        {
+          "text": "400年前",
+          "weight": 4
+        },
+        {
+          "text": "零卷时期",
+          "weight": 8
+        }
+      ],
+      "title": "穿越后的时间点"
+    },
+    {
+      "dbId": 3,
+      "items": [
+        {
+          "text": "E（普通人）",
+          "weight": 300
+        },
+        {
+          "text": "D（弱四级）",
+          "weight": 300
+        },
+        {
+          "text": "C（三级）",
+          "weight": 300
+        },
+        {
+          "text": "B（二级）",
+          "weight": 300
+        },
+        {
+          "text": "A（一级）",
+          "weight": 300
+        },
+        {
+          "text": "S（五条）",
+          "weight": 300
+        },
+        {
+          "text": "SS（乙骨）",
+          "weight": 300
+        },
+        {
+          "text": "SSS（宿傩）",
+          "weight": 300
+        },
+        {
+          "text": "E-（天与暴君同款咒力）",
+          "weight": 200
+        },
+        {
+          "text": "“INF”（零卷里香）",
+          "weight": 10
+        },
+        {
+          "text": "INF（是大奖金秤次，母庸置疑！）",
+          "weight": 1
+        }
+      ],
+      "title": "咒力总量"
+    },
+    {
+      "dbId": 4,
+      "items": [
+        {
+          "text": "SSS（六眼级）",
+          "weight": 2
+        },
+        {
+          "text": "SS（宿傩）",
+          "weight": 3
+        },
+        {
+          "text": "S（特级平均值）",
+          "weight": 3
+        },
+        {
+          "text": "A（一级术师）",
+          "weight": 3
+        },
+        {
+          "text": "B（二级术师）",
+          "weight": 3
+        },
+        {
+          "text": "C（三级术师）",
+          "weight": 3
+        },
+        {
+          "text": "D（初学者）",
+          "weight": 3
+        },
+        {
+          "text": "E（近乎没有）",
+          "weight": 3
+        },
+        {
+          "text": "E-（无）",
+          "weight": 2
+        },
+        {
+          "text": "E--（消耗不减反增）",
+          "weight": 1
+        }
+      ],
+      "title": "咒力效率"
+    },
+    {
+      "dbId": 6,
+      "items": [
+        {
+          "text": "十种影法术",
+          "weight": 1
+        },
+        {
+          "text": "无下限",
+          "weight": 1
+        },
+        {
+          "text": "赤血操术",
+          "weight": 1
+        },
+        {
+          "text": "咒灵操术",
+          "weight": 1
+        },
+        {
+          "text": "无为转变",
+          "weight": 1
+        },
+        {
+          "text": "十划咒法（七海）",
+          "weight": 1
+        },
+        {
+          "text": "咒言",
+          "weight": 1
+        },
+        {
+          "text": "不义游戏",
+          "weight": 1
+        },
+        {
+          "text": "黑鸟操术",
+          "weight": 1
+        },
+        {
+          "text": "投射咒法",
+          "weight": 1
+        },
+        {
+          "text": "构筑术式",
+          "weight": 1
+        },
+        {
+          "text": "傀儡操术",
+          "weight": 1
+        },
+        {
+          "text": "付丧操术",
+          "weight": 1
+        },
+        {
+          "text": "降灵术（参拜婆）",
+          "weight": 1
+        },
+        {
+          "text": "刍灵咒法（野蔷薇）",
+          "weight": 1
+        },
+        {
+          "text": "星之怒（九十九）",
+          "weight": 1
+        },
+        {
+          "text": "冰凝咒法",
+          "weight": 1
+        },
+        {
+          "text": "不死（天元）",
+          "weight": 1
+        },
+        {
+          "text": "奇迹（重面春太）",
+          "weight": 1
+        },
+        {
+          "text": "漏壶",
+          "weight": 1
+        },
+        {
+          "text": "花御",
+          "weight": 1
+        },
+        {
+          "text": "陀艮",
+          "weight": 1
+        },
+        {
+          "text": "乐岩寺",
+          "weight": 1
+        },
+        {
+          "text": "蚀烂术式（坏相、血涂）",
+          "weight": 1
+        },
+        {
+          "text": "疱疮神",
+          "weight": 1
+        },
+        {
+          "text": "夺舍（羂索）",
+          "weight": 1
+        },
+        {
+          "text": "坐杀搏徒",
+          "weight": 1
+        },
+        {
+          "text": "诛伏赐死",
+          "weight": 1
+        },
+        {
+          "text": "超人（高羽）",
+          "weight": 1
+        },
+        {
+          "text": "模仿",
+          "weight": 1
+        },
+        {
+          "text": "天空术式（乌鹭）",
+          "weight": 1
+        },
+        {
+          "text": "石流龙",
+          "weight": 1
+        },
+        {
+          "text": "漫画家",
+          "weight": 1
+        },
+        {
+          "text": "反重力",
+          "weight": 1
+        },
+        {
+          "text": "天使",
+          "weight": 1
+        },
+        {
+          "text": "鹿紫云一",
+          "weight": 1
+        },
+        {
+          "text": "达布拉",
+          "weight": 1
+        },
+        {
+          "text": "混沌与调和",
+          "weight": 1
+        },
+        {
+          "text": "再契象",
+          "weight": 1
+        },
+        {
+          "text": "黄栌折",
+          "weight": 1
+        },
+        {
+          "text": "强弱颠倒",
+          "weight": 1
+        },
+        {
+          "text": "御厨子（宿傩）",
+          "weight": 1
+        },
+        {
+          "text": "星间飞行",
+          "weight": 1
+        },
+        {
+          "text": "忧忧",
+          "weight": 1
+        },
+        {
+          "text": "新田新",
+          "weight": 1
+        },
+        {
+          "text": "羽生（喷气背包头发）",
+          "weight": 1
+        },
+        {
+          "text": "羽场（直升机头发）",
+          "weight": 1
+        },
+        {
+          "text": "禅院甚一",
+          "weight": 1
+        },
+        {
+          "text": "禅院兰太",
+          "weight": 1
+        },
+        {
+          "text": "降灵术·来访瑞兽（猪也）",
+          "weight": 1
+        },
+        {
+          "text": "丽美（拿头发扎人，没别的）",
+          "weight": 1
+        },
+        {
+          "text": "多鲁布",
+          "weight": 1
+        },
+        {
+          "text": "自定义",
+          "weight": 1
+        },
+        {
+          "text": "淀月（顺平）",
+          "weight": 1
+        },
+        {
+          "text": "分身（神秘纸袋男）",
+          "weight": 1
+        },
+        {
+          "text": "胧绝",
+          "weight": 1
+        },
+        {
+          "text": "连锁纹（漆英司）",
+          "weight": 1
+        },
+        {
+          "text": "咒布操术（白仓飞鹰）",
+          "weight": 1
+        },
+        {
+          "text": "灾难逆转咒",
+          "weight": 1
+        },
+        {
+          "text": "咒炼础术",
+          "weight": 1
+        }
+      ],
+      "title": "生得术式"
+    },
+    {
+      "dbId": 7,
+      "items": [
+        {
+          "text": "正向天与咒缚（肉体残缺换咒力增强）",
+          "weight": 1
+        },
+        {
+          "text": "负向天与咒缚（咒力为零换肉体增强）",
+          "weight": 1
+        }
+      ],
+      "title": "天与咒缚"
+    },
+    {
+      "dbId": 8,
+      "items": [
+        {
+          "text": "SSS（超越天与暴君）",
+          "weight": 10
+        },
+        {
+          "text": "SS（天与暴君）",
+          "weight": 30
+        },
+        {
+          "text": "S（入学虎杖）",
+          "weight": 30
+        },
+        {
+          "text": "A（泰森）",
+          "weight": 30
+        },
+        {
+          "text": "B（运动员）",
+          "weight": 30
+        },
+        {
+          "text": "C（体育生）",
+          "weight": 30
+        },
+        {
+          "text": "D（普通人）",
+          "weight": 30
+        },
+        {
+          "text": "E（营养不良）",
+          "weight": 30
+        },
+        {
+          "text": "E-（正向天与咒缚肉身）",
+          "weight": 20
+        },
+        {
+          "text": "SSS+（脱离生物范畴）",
+          "weight": 2
+        }
+      ],
+      "title": "肉体强度"
+    },
+    {
+      "dbId": 9,
+      "items": [
+        {
+          "text": "日本",
+          "weight": 50
+        },
+        {
+          "text": "非洲",
+          "weight": 10
+        },
+        {
+          "text": "亚洲除日本外其他地方",
+          "weight": 10
+        },
+        {
+          "text": "美洲",
+          "weight": 10
+        },
+        {
+          "text": "欧洲",
+          "weight": 10
+        },
+        {
+          "text": "西姆利亚星（自动变成西姆利亚星人）",
+          "weight": 3
+        }
+      ],
+      "title": "穿越后的地点"
+    },
+    {
+      "dbId": 19,
+      "items": [
+        {
+          "text": "SSS（超越五宿级）",
+          "weight": 5
+        },
+        {
+          "text": "SS（五宿、虎杖、乙骨级）",
+          "weight": 10
+        },
+        {
+          "text": "S（伏黑）",
+          "weight": 10
+        },
+        {
+          "text": "A（一般一级术师）",
+          "weight": 10
+        },
+        {
+          "text": "B（一般二级术师）",
+          "weight": 10
+        },
+        {
+          "text": "C（一般三级术师）",
+          "weight": 10
+        },
+        {
+          "text": "D（正常人）",
+          "weight": 10
+        },
+        {
+          "text": "E（是否开智存疑）",
+          "weight": 10
+        },
+        {
+          "text": "E-（学不明白任何事）",
+          "weight": 2
+        }
+      ],
+      "title": "天赋"
+    },
+    {
+      "dbId": 29,
+      "items": [
+        {
+          "text": "领域展延",
+          "weight": 5
+        },
+        {
+          "text": "反转术式外放",
+          "weight": 5
+        },
+        {
+          "text": "术式反转",
+          "weight": 5
+        },
+        {
+          "text": "简易领域",
+          "weight": 5
+        },
+        {
+          "text": "黑闪（68虎水平）",
+          "weight": 1
+        },
+        {
+          "text": "极之番",
+          "weight": 5
+        },
+        {
+          "text": "领域展开",
+          "weight": 5
+        },
+        {
+          "text": "傀儡咒术学（指咒骸制作）",
+          "weight": 5
+        },
+        {
+          "text": "新阴流居合",
+          "weight": 5
+        },
+        {
+          "text": "制作咒具",
+          "weight": 5
+        },
+        {
+          "text": "帐",
+          "weight": 18
+        },
+        {
+          "text": "简易领域（相扑）",
+          "weight": 4
+        },
+        {
+          "text": "弥虚葛笼",
+          "weight": 5
+        },
+        {
+          "text": "无敌贷款王（会精明利用束缚）",
+          "weight": 3
+        },
+        {
+          "text": "迳庭拳",
+          "weight": 5
+        },
+        {
+          "text": "神秘农家乐（？）",
+          "weight": 2
+        },
+        {
+          "text": "黑闪（一级术师）",
+          "weight": 5
+        },
+        {
+          "text": "散成咒力（非咒灵则重抽）",
+          "weight": 5
+        }
+      ],
+      "title": "会哪个高级技巧"
+    },
+    {
+      "dbId": 31,
+      "items": [
+        {
+          "text": "六眼",
+          "weight": 1
+        },
+        {
+          "text": "双面四臂",
+          "weight": 1
+        },
+        {
+          "text": "天与咒缚",
+          "weight": 1
+        },
+        {
+          "text": "虎杖版超级受肉体（如已有则重抽）",
+          "weight": 1
+        },
+        {
+          "text": "半人半咒",
+          "weight": 1
+        },
+        {
+          "text": "西姆利亚星人血脉（只是血脉 如已有则重抽）",
+          "weight": 1
+        },
+        {
+          "text": "星浆体",
+          "weight": 1
+        },
+        {
+          "text": "咒骸",
+          "weight": 1
+        }
+      ],
+      "title": "特殊天赋是"
+    },
+    {
+      "dbId": 35,
+      "items": [
+        {
+          "text": "封闭式",
+          "weight": 6
+        },
+        {
+          "text": "开放式",
+          "weight": 6
+        },
+        {
+          "text": "开放封闭自由切换",
+          "weight": 1
+        },
+        {
+          "text": "未完成",
+          "weight": 2
+        }
+      ],
+      "title": "领域类型"
+    },
+    {
+      "dbId": 36,
+      "items": [
+        {
+          "text": "必中",
+          "weight": 1
+        },
+        {
+          "text": "自动攻击（宿傩）",
+          "weight": 1
+        },
+        {
+          "text": "增幅自身类（称金次）",
+          "weight": 1
+        },
+        {
+          "text": "增幅咒术类（乙骨）",
+          "weight": 1
+        },
+        {
+          "text": "打击灵魂类（虎杖）",
+          "weight": 1
+        },
+        {
+          "text": "强控类（五条）",
+          "weight": 1
+        },
+        {
+          "text": "规则类（日车）",
+          "weight": 1
+        }
+      ],
+      "title": "领域效果"
+    }
+  ]
+}
